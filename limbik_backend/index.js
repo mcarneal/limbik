@@ -11,7 +11,6 @@ const data = require('./index.json')
 app.use(cors())
 
 app.get('/api/v1/posts', (req, res, next) => {
-    console.log(req)
     res.json(data)
 })
 
