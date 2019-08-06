@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Table from '../table/index.js'
 
 class Home extends Component {
 
@@ -31,7 +30,7 @@ class Home extends Component {
 
     renderData = () => {
         if(this.state.index.length > 0){
-            return this.state.index.slice(this.state.start, this.state.end).map(post => <p>post id: {post.id} , number of clicks :{post.clicks}, text : {this.postStringShortener(post.text)}</p>)
+            return this.state.index.slice(this.state.start, this.state.end).map(post => <tr><td>{post.id}</td><td>{post.clicks}</td><td>{post.impressions}</td><td>{this.postStringShortener(post.text)}</td></tr>)
         }
     }
 
@@ -84,12 +83,20 @@ class Home extends Component {
                 <h1>
                     Home 
                 </h1>
-                <Table data={this.state.index} />
+                <table>
+                    <tr>
+                        <th>Post ID</th>
+                        <th>Clicks</th>
+                        <th>Impressions</th>
+                        <th>Currency</th>
+                    </tr>
+                    {this.renderData()}
+            </table>
+                
                 <button onClick={this.backButtonHandler}>back</button>
                 <button onClick={this.nextButtonHandler}>next</button>
                 <button onClick={this.clickSortHandler}> sort up </button>
                 <button> sort down </button>
-                {this.renderData()}
 
         </div>
         )

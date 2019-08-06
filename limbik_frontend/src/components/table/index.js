@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
@@ -29,10 +29,20 @@ const styles = theme => ({
 });
 
 class MuiVirtualizedTable extends React.PureComponent {
+
+
   static defaultProps = {
     headerHeight: 48,
     rowHeight: 48,
   };
+
+    clickHandler = () => {
+       this.props.clickSortHandler()
+        this.setState({
+            clicked : !this.state.clicked
+        })
+    }
+
 
   getRowClassName = ({ index }) => {
     const { classes, onRowClick } = this.props;
@@ -64,19 +74,20 @@ class MuiVirtualizedTable extends React.PureComponent {
 
     return (
         <TableCell
-        onClick={(e)=> console.log('test', this.props)}
+        onClick={this.clickHanlder}
         component="div"
         className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
         variant="head"
         style={{ height: headerHeight }}
         align={columns[columnIndex].numeric || false ? 'right' : 'left'}
       >
-        <span>{label}</span>
+        <button>{label}</button>
       </TableCell>
     );
   };
 
-  render() {
+    render() {
+        console.log('inside wierd table', this.props)
     const { classes, columns, rowHeight, headerHeight, ...tableProps } = this.props;
     return (
       <AutoSizer>
@@ -89,7 +100,7 @@ class MuiVirtualizedTable extends React.PureComponent {
             {...tableProps}
             rowClassName={this.getRowClassName}
           >
-            {columns.map(({ dataKey, ...other }, index) => {
+                  {columns.map(({ dataKey, ...other }, index) => {
               return (
                   <Column
                   key={dataKey}
@@ -132,55 +143,95 @@ const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
 
 
-function createData(id, dessert, calories, fat, carbs, protein) {
-  return { id, dessert, calories, fat, carbs, protein };
+const createData = (id, postid, clicks, impressions, currency, text, button) => {
+  return { id, postid, clicks, impressions, currency, text, button };
+}
+
+const textShortener = (text) => {
+    if (text && text.length > 20){
+        return text.slice(0,20).concat('...')
+    }
+    else if (text && text.length < 20){
+        return text
+    }
+    else {
+        return 'no text provided'
+    }
 }
 
 const rows = [];
 
 
-export default function ReactVirtualizedTable(props) {
+class ReactVirtualizedTable extends Component {
 
-    for (let i = 0; i < props.data.length ; i += 1) {
-        rows.push(createData(props.data[i].id, props.data[i].id, props.data[i].clicks, props.data[i].impressions, `${props.data[i].spend.amount} ${props.data[i].spend.currency}`, 'this is a test this is a test this is a test this is a test'));
+
+    state = {
+        clicked : false 
+    }
+
+
+    clickHandler = () => {
+       this.props.clickSortHandler()
+        this.setState({
+            clicked : !this.state.clicked
+        })
+    }
+
+    componentDidUpdate(prevProps){
+            console.log('updating comp', prevProps, this.props)
+    }
+
+    render(){
+
+        console.log('reacttable', this.state)
+
+    for (let i = 0; i < this.props.data.length ; i += 1) {
+        rows.push(createData(this.props.data[i].id, this.props.data[i].id, this.props.data[i].clicks, this.props.data[i].impressions, `${this.props.data[i].spend.amount} ${this.props.data[i].spend.currency}`, textShortener(this.props.data[i].text) , <button>View More</button>));
     }
   return (
-    <Paper style={{ height: 400, width: '75%' }}>
+    <Paper style={{ height: 600, width: '100%' }}>
         <VirtualizedTable
-        data={props.data}
+        clickSortHandler={this.clickHandler}
+        data={this.props.data}
         rowCount={rows.length}
-        rowGetter={({ index }) => rows[index]}
+        rowGetter={({ clicks }) => rows[clicks]}
         columns={[
             {
             width: 120,
             label: 'Post ID:',
-            dataKey: 'dessert',
+            dataKey: 'postid',
           },
           {
             width: 120,
             label: 'Clicks',
-            dataKey: 'calories',
+            dataKey: 'clicks',
             numeric: true,
           },
           {
             width: 120,
             label: 'Impressions',
-            dataKey: 'fat',
+            dataKey: 'impressions',
             numeric: true,
           },
           {
             width: 120,
             label: 'Currency',
-            dataKey: 'carbs',
+            dataKey: 'currency',
           },
           {
-            width: 500,
-            label: 'Protein\u00A0(g)',
-            dataKey: 'protein',
+            width: 240,
+            label: 'Text',
+            dataKey: 'text',
             numeric: true,
+          },
+          {
+            width: 120,
+            dataKey: 'button',
           },
         ]}
       />
     </Paper>
   );
 }
+}
+export default ReactVirtualizedTable   
