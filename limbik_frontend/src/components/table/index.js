@@ -1,237 +1,110 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import { withStyles } from '@material-ui/core/styles';
-import TableCell from '@material-ui/core/TableCell';
-import Paper from '@material-ui/core/Paper';
-import { AutoSizer, Column, Table } from 'react-virtualized';
+import _ from 'lodash'
+import React, { Component } from 'react'
+import { Table } from 'semantic-ui-react'
 
-const styles = theme => ({
-  flexContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-  },
-  tableRow: {
-    cursor: 'pointer',
-  },
-  tableRowHover: {
-    '&:hover': {
-      backgroundColor: theme.palette.grey[200],
-    },
-  },
-  tableCell: {
-    flex: 1,
-  },
-  noClick: {
-    cursor: 'initial',
-  },
-});
-
-class MuiVirtualizedTable extends React.PureComponent {
+const tableData = []
 
 
-  static defaultProps = {
-    headerHeight: 48,
-    rowHeight: 48,
-  };
 
-    clickHandler = () => {
-       this.props.clickSortHandler()
-        this.setState({
-            clicked : !this.state.clicked
+class PostTable extends Component {
+
+  state = {
+    column: null,
+    data: tableData,
+    direction: null,
+  }
+
+    postStringShortener = (string) => {
+        if (string && string.length > 50){
+            return string.slice(0, 50).concat('...')
+        } else if (string && string.length < 50) {
+            return string
+        } else {
+            return 'no description'
+        }
+    }
+    
+
+    getTableData = () => {
+        this.props.data.forEach((post)=>{
+            tableData.push({postid: post.id , text: this.postStringShortener(post.text), clicks: post.clicks, impressions: post.impressions, currency : `${post.spend.amount > 0 ? post.spend.amount : ''}  ${post.spend.currency ? post.spend.currency : 'None'}`})
         })
     }
 
+  handleSort = clickedColumn => () => {
+    const { column, data, direction } = this.state
 
-  getRowClassName = ({ index }) => {
-    const { classes, onRowClick } = this.props;
+    if (column !== clickedColumn) {
+      this.setState({
+        column: clickedColumn,
+        data: _.sortBy(data, [clickedColumn]),
+        direction: 'ascending',
+      })
 
-    return clsx(classes.tableRow, classes.flexContainer, {
-      [classes.tableRowHover]: index !== -1 && onRowClick != null,
-    });
-  };
+      return
+    }
 
-  cellRenderer = ({ cellData, columnIndex }) => {
-    const { columns, classes, rowHeight, onRowClick } = this.props;
-    return (
-      <TableCell
-        component="div"
-        className={clsx(classes.tableCell, classes.flexContainer, {
-          [classes.noClick]: onRowClick == null,
-        })}
-        variant="body"
-        style={{ height: rowHeight }}
-        align={(columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
-      >
-        {cellData}
-      </TableCell>
-    );
-  };
-
-  headerRenderer = ({ label, columnIndex }) => {
-    const { headerHeight, columns, classes } = this.props;
-
-    return (
-        <TableCell
-        onClick={this.clickHanlder}
-        component="div"
-        className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
-        variant="head"
-        style={{ height: headerHeight }}
-        align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-      >
-        <button>{label}</button>
-      </TableCell>
-    );
-  };
+    this.setState({
+      data: data.reverse(),
+      direction: direction === 'ascending' ? 'descending' : 'ascending',
+    })
+  }
 
     render() {
-        console.log('inside wierd table', this.props)
-    const { classes, columns, rowHeight, headerHeight, ...tableProps } = this.props;
-    return (
-      <AutoSizer>
-        {({ height, width }) => (
-          <Table
-            height={height}
-            width={width}
-            rowHeight={rowHeight}
-            headerHeight={headerHeight}
-            {...tableProps}
-            rowClassName={this.getRowClassName}
-          >
-                  {columns.map(({ dataKey, ...other }, index) => {
-              return (
-                  <Column
-                  key={dataKey}
-                  headerRenderer={headerProps =>
-                    this.headerRenderer({
-                      ...headerProps,
-                      columnIndex: index,
-                    })
-                  }
-                  className={classes.flexContainer}
-                  cellRenderer={this.cellRenderer}
-                  dataKey={dataKey}
-                  {...other}
-                />
-              );
-            })}
-          </Table>
-        )}
-      </AutoSizer>
-    );
+        this.getTableData()
+      const { column, data, direction } = this.state
+        return (
+            <div className='table'>
+      <Table sortable celled fixed>
+        <Table.Header className='table-head'>
+          <Table.Row>
+              <Table.HeaderCell
+              sorted={column === 'postid' ? direction : null}
+              onClick={this.handleSort('postid')}
+            >
+              Post ID
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === 'text' ? direction : null}
+              onClick={this.handleSort('text')}
+            >
+              Text
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === 'clicks' ? direction : null}
+              onClick={this.handleSort('clicks')}
+            >
+              Clicks
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === 'impressions' ? direction : null}
+              onClick={this.handleSort('impressions')}
+            >
+              Impressions
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === 'currency' ? direction : null}
+              onClick={this.handleSort('currency')}
+            >
+              Currency
+            </Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body className='table-body'>
+          {_.map(data, ({ postid, text, clicks, impressions, currency }) => (
+            <Table.Row key={postid}>
+              <Table.Cell>{postid}</Table.Cell>
+              <Table.Cell>{text}</Table.Cell>
+              <Table.Cell>{clicks}</Table.Cell>
+              <Table.Cell>{impressions}</Table.Cell>
+              <Table.Cell>{currency}</Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+    </Table>
+    </div>
+    )
   }
 }
 
-MuiVirtualizedTable.propTypes = {
-  classes: PropTypes.object.isRequired,
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      dataKey: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      numeric: PropTypes.bool,
-      width: PropTypes.number.isRequired,
-    }),
-  ).isRequired,
-  headerHeight: PropTypes.number,
-  onRowClick: PropTypes.func,
-  rowHeight: PropTypes.number,
-};
-
-const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
-
-
-
-const createData = (id, postid, clicks, impressions, currency, text, button) => {
-  return { id, postid, clicks, impressions, currency, text, button };
-}
-
-const textShortener = (text) => {
-    if (text && text.length > 20){
-        return text.slice(0,20).concat('...')
-    }
-    else if (text && text.length < 20){
-        return text
-    }
-    else {
-        return 'no text provided'
-    }
-}
-
-const rows = [];
-
-
-class ReactVirtualizedTable extends Component {
-
-
-    state = {
-        clicked : false 
-    }
-
-
-    clickHandler = () => {
-       this.props.clickSortHandler()
-        this.setState({
-            clicked : !this.state.clicked
-        })
-    }
-
-    componentDidUpdate(prevProps){
-            console.log('updating comp', prevProps, this.props)
-    }
-
-    render(){
-
-        console.log('reacttable', this.state)
-
-    for (let i = 0; i < this.props.data.length ; i += 1) {
-        rows.push(createData(this.props.data[i].id, this.props.data[i].id, this.props.data[i].clicks, this.props.data[i].impressions, `${this.props.data[i].spend.amount} ${this.props.data[i].spend.currency}`, textShortener(this.props.data[i].text) , <button>View More</button>));
-    }
-  return (
-    <Paper style={{ height: 600, width: '100%' }}>
-        <VirtualizedTable
-        clickSortHandler={this.clickHandler}
-        data={this.props.data}
-        rowCount={rows.length}
-        rowGetter={({ clicks }) => rows[clicks]}
-        columns={[
-            {
-            width: 120,
-            label: 'Post ID:',
-            dataKey: 'postid',
-          },
-          {
-            width: 120,
-            label: 'Clicks',
-            dataKey: 'clicks',
-            numeric: true,
-          },
-          {
-            width: 120,
-            label: 'Impressions',
-            dataKey: 'impressions',
-            numeric: true,
-          },
-          {
-            width: 120,
-            label: 'Currency',
-            dataKey: 'currency',
-          },
-          {
-            width: 240,
-            label: 'Text',
-            dataKey: 'text',
-            numeric: true,
-          },
-          {
-            width: 120,
-            dataKey: 'button',
-          },
-        ]}
-      />
-    </Paper>
-  );
-}
-}
-export default ReactVirtualizedTable   
+export default PostTable
