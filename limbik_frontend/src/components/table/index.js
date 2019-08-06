@@ -1,108 +1,125 @@
-import _ from 'lodash'
 import React, { Component } from 'react'
-import { Table } from 'semantic-ui-react'
-
-const tableData = []
 
 
+let rows = []
 
 class PostTable extends Component {
 
-  state = {
-    column: null,
-    data: tableData,
-    direction: null,
-  }
 
-    postStringShortener = (string) => {
-        if (string && string.length > 50){
-            return string.slice(0, 50).concat('...')
-        } else if (string && string.length < 50) {
-            return string
-        } else {
-            return 'no description'
+    state = {
+        initialOrder : [],
+        direction : '',
+        data : []
+    }
+
+    sortImpressionsHandler = (e) => {
+    
+        console.log('yeah')
+
+        let data = this.props.data
+      
+        if(e.target.id === 'Assc'){
+            rows = data.sort((a,b)=>{
+                return a.impressions-b.impressions
+                })
+            e.target.id = 'Desc'
+            this.setState({ 
+                direction : 'Assc',
+            })
+        }
+        else if(e.target.id === 'Desc'){
+            rows = data.sort((a,b)=>{
+                return b.impressions-a.impressions
+            })
+            e.target.id = 'Assc'
+            this.setState({ direction : 'Desc' })
+            }
+        else{
+            return null
         }
     }
-    
 
-    getTableData = () => {
-        this.props.data.forEach((post)=>{
-            tableData.push({postid: post.id , text: this.postStringShortener(post.text), clicks: post.clicks, impressions: post.impressions, currency : `${post.spend.amount > 0 ? post.spend.amount : ''}  ${post.spend.currency ? post.spend.currency : 'None'}`})
-        })
+    sortClickHandler = (e) => {
+
+        let data = this.props.data
+      
+        if(e.target.id === 'Assc'){
+            rows = data.sort((a,b)=>{
+                return a.clicks-b.clicks
+                })
+            e.target.id = 'Desc'
+            this.setState({ 
+                direction : 'Assc',
+            })
+        }
+        else if(e.target.id === 'Desc'){
+            rows = data.sort((a,b)=>{
+                return b.clicks-a.clicks
+            })
+            e.target.id = 'Assc'
+            this.setState({ direction : 'Desc' })
+            }
+        else{
+            return null
+        }
     }
 
-  handleSort = clickedColumn => () => {
-    const { column, data, direction } = this.state
-
-    if (column !== clickedColumn) {
-      this.setState({
-        column: clickedColumn,
-        data: _.sortBy(data, [clickedColumn]),
-        direction: 'ascending',
-      })
-
-      return
+    postStringShortener = (string) => {
+        if(string && string.length > 50){
+            return string.slice(0,50).concat('...')
+        }
+        else if(string && string.length < 50){
+            return string
+        }
+        else 
+            return 'no description'
     }
 
-    this.setState({
-      data: data.reverse(),
-      direction: direction === 'ascending' ? 'descending' : 'ascending',
-    })
-  }
+    getTableRows = () => {
+            return rows.map(post => <tr>
+                <td>{post.id}</td>
+                <td>{this.postStringShortener(post.text)}</td>
+                <td>{post.clicks}</td>
+                <td>{post.impressions}</td>
+                <td>{`${post.spend.amount ? post.spend.amount : 0} ${post.spend.currency ? post.spend.currency : ''}`}</td>
+                </tr>)
+
+        }
+
+    collectRows = () => {
+        if(rows.length <= 0){
+            this.props.data.map(post => rows.push(post))
+        } else if( rows.length !== this.props.data.length){
+            rows = []
+            this.props.data.map(post => rows.push(post))
+        }
+    }
 
     render() {
-        this.getTableData()
-      const { column, data, direction } = this.state
-        return (
+        this.collectRows()
+        return(
             <div className='table'>
-      <Table sortable celled fixed>
-        <Table.Header className='table-head'>
-          <Table.Row>
-              <Table.HeaderCell
-              sorted={column === 'postid' ? direction : null}
-              onClick={this.handleSort('postid')}
-            >
-              Post ID
-            </Table.HeaderCell>
-            <Table.HeaderCell
-              sorted={column === 'text' ? direction : null}
-              onClick={this.handleSort('text')}
-            >
-              Text
-            </Table.HeaderCell>
-            <Table.HeaderCell
-              sorted={column === 'clicks' ? direction : null}
-              onClick={this.handleSort('clicks')}
-            >
-              Clicks
-            </Table.HeaderCell>
-            <Table.HeaderCell
-              sorted={column === 'impressions' ? direction : null}
-              onClick={this.handleSort('impressions')}
-            >
-              Impressions
-            </Table.HeaderCell>
-            <Table.HeaderCell
-              sorted={column === 'currency' ? direction : null}
-              onClick={this.handleSort('currency')}
-            >
-              Currency
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body className='table-body'>
-          {_.map(data, ({ postid, text, clicks, impressions, currency }) => (
-            <Table.Row key={postid}>
-              <Table.Cell>{postid}</Table.Cell>
-              <Table.Cell>{text}</Table.Cell>
-              <Table.Cell>{clicks}</Table.Cell>
-              <Table.Cell>{impressions}</Table.Cell>
-              <Table.Cell>{currency}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-    </Table>
-    </div>
+            <table style={{width : '95vw'}}>
+                <tr>
+                <th>Post ID</th>
+                <th>Text</th>
+                <th><button
+                    name='clicks'
+                    id='Assc'
+                    onClick={this.sortClickHandler}>Clicks</button></th>
+            <th>
+                <button
+                    name='impressions'
+                    id='Assc'
+                    onClick={this.sortImpressionsHandler}>
+                        Impressions
+                </button>
+            </th>
+                <th>Currency</th>
+            </tr>
+            {this.getTableRows()}
+        </table>
+</div>
     )
   }
 }
