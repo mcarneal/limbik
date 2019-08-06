@@ -1,68 +1,186 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+import { withStyles } from '@material-ui/core/styles';
 import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { AutoSizer, Column, Table } from 'react-virtualized';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing(3),
-    overflowX: 'auto',
+const styles = theme => ({
+  flexContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    boxSizing: 'border-box',
   },
-  table: {
-    minWidth: 650,
+  tableRow: {
+    cursor: 'pointer',
   },
-}));
+  tableRowHover: {
+    '&:hover': {
+      backgroundColor: theme.palette.grey[200],
+    },
+  },
+  tableCell: {
+    flex: 1,
+  },
+  noClick: {
+    cursor: 'initial',
+  },
+});
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
+class MuiVirtualizedTable extends React.PureComponent {
+  static defaultProps = {
+    headerHeight: 48,
+    rowHeight: 48,
+  };
+
+  getRowClassName = ({ index }) => {
+    const { classes, onRowClick } = this.props;
+
+    return clsx(classes.tableRow, classes.flexContainer, {
+      [classes.tableRowHover]: index !== -1 && onRowClick != null,
+    });
+  };
+
+  cellRenderer = ({ cellData, columnIndex }) => {
+    const { columns, classes, rowHeight, onRowClick } = this.props;
+    return (
+      <TableCell
+        component="div"
+        className={clsx(classes.tableCell, classes.flexContainer, {
+          [classes.noClick]: onRowClick == null,
+        })}
+        variant="body"
+        style={{ height: rowHeight }}
+        align={(columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
+      >
+        {cellData}
+      </TableCell>
+    );
+  };
+
+  headerRenderer = ({ label, columnIndex }) => {
+    const { headerHeight, columns, classes } = this.props;
+
+    return (
+        <TableCell
+        onClick={(e)=> console.log('test', this.props)}
+        component="div"
+        className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
+        variant="head"
+        style={{ height: headerHeight }}
+        align={columns[columnIndex].numeric || false ? 'right' : 'left'}
+      >
+        <span>{label}</span>
+      </TableCell>
+    );
+  };
+
+  render() {
+    const { classes, columns, rowHeight, headerHeight, ...tableProps } = this.props;
+    return (
+      <AutoSizer>
+        {({ height, width }) => (
+          <Table
+            height={height}
+            width={width}
+            rowHeight={rowHeight}
+            headerHeight={headerHeight}
+            {...tableProps}
+            rowClassName={this.getRowClassName}
+          >
+            {columns.map(({ dataKey, ...other }, index) => {
+              return (
+                  <Column
+                  key={dataKey}
+                  headerRenderer={headerProps =>
+                    this.headerRenderer({
+                      ...headerProps,
+                      columnIndex: index,
+                    })
+                  }
+                  className={classes.flexContainer}
+                  cellRenderer={this.cellRenderer}
+                  dataKey={dataKey}
+                  {...other}
+                />
+              );
+            })}
+          </Table>
+        )}
+      </AutoSizer>
+    );
+  }
+}
+
+MuiVirtualizedTable.propTypes = {
+  classes: PropTypes.object.isRequired,
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      dataKey: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      numeric: PropTypes.bool,
+      width: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+  headerHeight: PropTypes.number,
+  onRowClick: PropTypes.func,
+  rowHeight: PropTypes.number,
+};
+
+const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
+
+
+
+function createData(id, dessert, calories, fat, carbs, protein) {
+  return { id, dessert, calories, fat, carbs, protein };
 }
 
 const rows = [];
 
-const makeRows = (data) => {
-    data.map((post) => {
-        rows.push(createData(post.id, post.clicks))
-    })
-}
 
-export default function SimpleTable(props) {
+export default function ReactVirtualizedTable(props) {
 
-    makeRows(props.data)
-
-  const classes = useStyles();
-
+    for (let i = 0; i < props.data.length ; i += 1) {
+        rows.push(createData(props.data[i].id, props.data[i].id, props.data[i].clicks, props.data[i].impressions, `${props.data[i].spend.amount} ${props.data[i].spend.currency}`, 'this is a test this is a test this is a test this is a test'));
+    }
   return (
-    <Paper className={classes.root}>
-      <Table className={classes.table}>
-        <TableHead>
-          <TableRow>
-            <TableCell align='left'>Post ID:</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-            {rows.map(row => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {row.name}
-              </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right"><button>test</button></TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
-              <TableCell align="right">{row.protein}</TableCell>
-          </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <Paper style={{ height: 400, width: '75%' }}>
+        <VirtualizedTable
+        data={props.data}
+        rowCount={rows.length}
+        rowGetter={({ index }) => rows[index]}
+        columns={[
+            {
+            width: 120,
+            label: 'Post ID:',
+            dataKey: 'dessert',
+          },
+          {
+            width: 120,
+            label: 'Clicks',
+            dataKey: 'calories',
+            numeric: true,
+          },
+          {
+            width: 120,
+            label: 'Impressions',
+            dataKey: 'fat',
+            numeric: true,
+          },
+          {
+            width: 120,
+            label: 'Currency',
+            dataKey: 'carbs',
+          },
+          {
+            width: 500,
+            label: 'Protein\u00A0(g)',
+            dataKey: 'protein',
+            numeric: true,
+          },
+        ]}
+      />
     </Paper>
   );
 }
