@@ -76,7 +76,8 @@ class PostTable extends Component {
     }
 
     getTableRows = () => {
-            return rows.map(post => <tr>
+        return rows.map(post => <tr id={`${post.id}`}>
+            <td><button className='ui green button'  onClick={(e)=> this.props.compareDataHandeler(e.target.parentNode.parentNode.id)}>Add to compare</button></td>
                 <td>{post.id}</td>
                 <td>{this.postStringShortener(post.text)}</td>
                 <td>{post.clicks}</td>
@@ -101,14 +102,17 @@ class PostTable extends Component {
             <div className='table'>
             <table style={{width : '95vw'}}>
                 <tr>
+                <th>Check</th>
                 <th>Post ID</th>
                 <th>Text</th>
                 <th><button
+                    className='ui grey button'
                     name='clicks'
                     id='Assc'
                     onClick={this.sortClickHandler}>Clicks</button></th>
             <th>
                 <button
+                    className='ui grey button'
                     name='impressions'
                     id='Assc'
                     onClick={this.sortImpressionsHandler}>

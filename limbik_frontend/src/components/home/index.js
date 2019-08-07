@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import Table from '../table/index.js'
 import Search from '../search/index.js'
-import FilterSelect from '../search/filterSelect.js'
 import NewFilter from '../search/newFilter.js'
+import Compare from '../compare/index.js'
 
 class Home extends Component {
 
@@ -10,7 +10,8 @@ class Home extends Component {
     state = {
         index : [],
         targetFilter : '',
-        filteredData : []
+        filteredData : [],
+        compareData : []
     }
 
 
@@ -63,16 +64,42 @@ class Home extends Component {
         this.setState({filteredData})
     }
 
+    clearFilterHandeler = () => {
+        this.setState({
+            filteredData : ''
+        })
+    }
+
+    compareDataHandeler = (id) => {
+        let post = this.findPostById(id)
+        if(this.state.compareData.includes(post[0])){
+            let compareData = this.state.compareData.filter(postObj => postObj.id !== post[0].id )
+            this.setState({compareData})
+        }else {
+            this.setState({
+                compareData : [...this.state.compareData, post[0]]
+            })
+        }
+    }
+
+    findPostById = (id) =>{
+        let post = this.state.index.filter(postObj => postObj.id === parseInt(id))
+        return post
+    }
+
     render(){
         return(
             <div className='home'>
                 <Search
                     onChangeHandler={this.onChangeHandler}
                     searchInput={this.state.search} />
-                <FilterSelect data={this.state.index} filterChangeHandler={this.filterChangeHandler}/>
 
-                <NewFilter data={this.state.index} filterHandeler={this.filterHandeler} />
-                <Table data={this.state.filteredData.length > 0 ? this.state.filteredData : this.state.index} /> 
+                <NewFilter data={this.state.index} filterHandeler={this.filterHandeler}  clearFilterHandeler={this.clearFilterHandeler}/>
+                <Compare data={this.state.compareData} />
+                <Table 
+                    data={this.state.filteredData.length > 0 ? this.state.filteredData : this.state.index}
+                    compareDataHandeler={this.compareDataHandeler}
+                /> 
 
         </div>
         )
