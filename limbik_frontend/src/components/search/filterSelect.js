@@ -15,6 +15,7 @@ class FilterSelect extends Component{
     collectTargetTypes = () => {
         if(this.props.data){
             this.props.data.map((post)=> {
+                console.log(Object.entries(post.targeting))
                 Object.entries(post.targeting).map((item)=>{
                     if(item[1]){
                         Object.entries(item[1]).map((value)=>{
@@ -33,6 +34,7 @@ class FilterSelect extends Component{
                 })  
             })
         }
+        console.log(allTypes)
     }
 
     assignKeys = () => {
