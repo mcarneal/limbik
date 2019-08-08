@@ -86,9 +86,11 @@ class NewFilter extends Component{
     render(){
         return(
             <div>
-                <button class='ui blue button' onClick={this.clearFilterHandeler}>Clear Filters</button>
                 <Select options={this.assignKeysToSelect()} value={this.state.firstFilter} onChange={this.firstFilterChangeHandeler} />
                     { this.state.firstFilter ? <Select options={this.assignSubCategory()} onChange={(e)=> this.props.filterHandeler(e, this.state.firstFilter)} /> : null  } 
+                    <br></br> 
+                    <br></br> 
+                    <button class='ui blue button' onClick={this.clearFilterHandeler}>Clear Filters</button>
             </div>
         )
     }
