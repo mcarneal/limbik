@@ -1,3 +1,37 @@
+Limbik Data Analysis:
+
+
+This application was designed to parse and read a JSON file consisting of targeted facebook posts from the 2016 presidaential election designed to interup the electoral process. 
+
+This application is built with a front-end based in react and backend built with node. 
+
+The front-end was built with the following packages:
+
+
+Front-end:
+:React
+:Material and semantic UI -Semanitc UI was used for production purposes. The only features of Semanitc are the inital button placements. In the next build semantic will be replaced with only Material UI elements.
+ 
+
+Backend:
+Node and Express were used to serve the JSON file to the frontend. 
+
+
+
+Installation Instructions:
+
+This file is broken into Two directories: Limbik-frontend and Limbik Backend.
+From the Backend folder run a Node index.js to begin the Express Server. By default this will run on localhost 3000:
+
+From the Front end directory run NPM start to begin the React App. if the React app attempts to run on localhost 3000 a warning will appear asking to start on 3001. Press yes.
+
+You can now begin your inspection of the 2016 facebook fake news posts in a visually appealing method. 
+
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
