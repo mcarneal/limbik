@@ -75,9 +75,45 @@ class Compare extends Component{
         })
   }
 
+    collectTargetingProps = () => {
+        let dupArr = []
+        this.props.data.map((post)=>{
+            Object.keys(post.targeting).map((key)=>{
+                if(post.targeting[`${key}`] instanceof Array){
+                    post.targeting[`${key}`].map((value)=>{
+                        dupArr.push(value)
+                    })
+                } 
+            })
+        })
+        return dupArr
+    }
+
+
+    findDuplicates = (data)=> {
+        let result = [];
+        data.forEach((element, index)=> {
+            if (data.indexOf(element, index + 1) > -1) {
+                if (result.indexOf(element) === -1) {
+                    result.push(element);
+                }
+            }
+        });
+        return result;
+    }
+
+
+    renderDuplicates = () => {
+        let valueArray = this.collectTargetingProps()
+        let duplicates = this.findDuplicates(valueArray)
+        return duplicates 
+    }
+
+
 
     render(){
 
+        let duplicates = this.renderDuplicates()
 
         return(
             <div>
@@ -85,7 +121,8 @@ class Compare extends Component{
                     {this.props.data.length > 0 ? this.createTable() : <h3>Compare data sets currently empty</h3>}
             </div>
                 {this.props.data.length > 0 ?  <button onClick={this.handleClickOpen} id='analyze' className='ui button blue'>Analyze</button> : null }
-        <Modal
+            <Modal
+            duplicates={duplicates}
             handleClose={this.handleClose}
             data={this.props.data}
             open={this.state.open} />

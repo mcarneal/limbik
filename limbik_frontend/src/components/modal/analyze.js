@@ -48,8 +48,15 @@ class FullScreenDialog extends Component{
         return this.props.data.map(post=> <Show data={[post]} />)
     }
 
-    render(){
+    renderDuplicates = () => {
+        if (this.props.duplicates.length > 0){
+            return this.props.duplicates.map(value => <h4>{value}</h4>)
+        }
+    }
 
+    render(){
+    
+        console.log('found my dups', this.props.duplicates)
 
   return (
     <div>
@@ -67,14 +74,18 @@ class FullScreenDialog extends Component{
             <Grid container
                 justify='space-evenly'
             >
-                <Grid xs={12} sm={6} md={4}
-                >
+                <Grid xs={12} sm={6} md={4}>
                     <br></br>
-                    {this.renderPost()}
+                    <br></br>
+                    <h2 align='center' style={{textAllign : 'center'}}>Selected Posts</h2>
+      <div style={{ marginTop : '8vh',height : '75vh', overflowY : 'scroll'}}>
+                        {this.renderPost()}
+            </div>
                 </Grid>
                 <Grid xs={12} sm={6} md={4}>
                     <br></br>
-                    <h2 style={{textDecoration : 'underline'}}>Post Text</h2>
+                    <h2 style={{textDecoration : 'underline'}}>Two or More of these post have the following targeting values in common</h2>
+                        {this.renderDuplicates()}
                 </Grid>
             </Grid>
       </Dialog>
