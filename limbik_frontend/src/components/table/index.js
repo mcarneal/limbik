@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Modal from '../modal/index.js'
 
 
 let rows = []
@@ -7,9 +8,12 @@ class PostTable extends Component {
 
 
     state = {
+        loaded : false,
         initialOrder : [],
         direction : '',
-        data : []
+        data : [],
+        singlePost : null,
+        open : false 
     }
 
     sortImpressionsHandler = (e) => {
@@ -66,7 +70,7 @@ class PostTable extends Component {
 
     postStringShortener = (string) => {
         if(string && string.length > 50){
-            return string.slice(0,50).concat('...')
+            return string.slice(0,47).concat('...')
         }
         else if(string && string.length < 50){
             return string
@@ -75,16 +79,47 @@ class PostTable extends Component {
             return 'no description'
     }
 
-    getTableRows = () => {
-        return rows.map(post => <tr id={`${post.id}`}>
-            <td><button className='ui green button'  onClick={(e)=> this.props.compareDataHandeler(e.target.parentNode.parentNode.id)}>Add to compare</button></td>
-                <td>{post.id}</td>
-                <td>{this.postStringShortener(post.text)}</td>
-                <td>{post.clicks}</td>
-                <td>{post.impressions}</td>
-                <td>{`${post.spend.amount ? post.spend.amount : 0} ${post.spend.currency ? post.spend.currency : ''}`}</td>
-                </tr>)
+    moreInfoClickHandeler = (e) => {
+        this.handleClickOpen()
+        let postId = e.target.parentNode.parentNode.id
+        let post = this.props.data.filter((post => post.id === parseInt(postId)))
+        this.setState({
+            singlePost : post
+        })
+    }
+    handleClickOpen = ()=> {
+        this.setState({
+            open : true
+        })
+  }
 
+    handleClose =()=> {
+        this.setState({
+            open : false
+        })
+  }
+
+
+    getTableRows = () => {
+        const table =  rows.map(post =>
+            <tbody id={`${post.id}`}>
+            <td><button 
+                className='ui green button'  
+                onClick={(e)=> this.props.compareDataHandeler(e.target.parentNode.parentNode.id)}>Add to compare</button></td>
+        <td><button
+                onClick={this.moreInfoClickHandeler}
+                className='ui blue button'
+                >More Info
+            </button></td>
+                <td>{post.id}</td>
+                <td style={{textAlign : 'left'}}><a href={post.url} target="_blank">{post.url}</a></td>
+                <td style={{textAlign : 'left'}}>{this.postStringShortener(post.text)}</td>
+                <td style={{textAlign : 'left'}}>{post.clicks}</td>
+                <td style={{textAlign : 'left'}}>{post.impressions}</td>
+                <td style={{textAlign : 'left'}}>{`${post.spend.amount ? post.spend.amount : 0} ${post.spend.currency ? post.spend.currency : ''}`}</td>
+                </tbody>)
+
+        return table
         }
 
     collectRows = () => {
@@ -96,14 +131,17 @@ class PostTable extends Component {
         }
     }
 
-    render() {
+
+render() {
         this.collectRows()
         return(
             <div className='table'>
-            <table style={{width : '95vw'}}>
+            <table style={{width : '80vw'}}>
                 <tr>
                 <th>Check</th>
+                <th>Details</th>
                 <th>Post ID</th>
+                <th>URL</th>
                 <th>Text</th>
                 <th><button
                     className='ui grey button'
@@ -123,6 +161,10 @@ class PostTable extends Component {
             </tr>
             {this.getTableRows()}
         </table>
+        <Modal
+            handleClose={this.handleClose}
+            data={this.state.singlePost}
+            open={this.state.open} />
 </div>
     )
   }

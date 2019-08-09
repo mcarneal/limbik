@@ -1,8 +1,11 @@
 import React, { Component } from 'react'
 import Table from '../table/index.js'
 import Search from '../search/index.js'
-import NewFilter from '../search/newFilter.js'
+import NewFilter from '../search/filter.js'
 import Compare from '../compare/index.js'
+import NavBar from '../navbar/index.js'
+import Progress from '../progress/index.js'
+
 
 class Home extends Component {
 
@@ -11,18 +14,20 @@ class Home extends Component {
         index : [],
         targetFilter : '',
         filteredData : [],
-        compareData : []
+        compareData : [],
+        loaded : false
     }
 
 
     componentDidMount(){
         fetch(`http://localhost:3000/api/v1/posts`)
             .then(res => res.json())
-            .then(data => {
+            .then(data =>{
                 this.setState({
-                    index : data
+                    index : data,
+                    loaded : true
                 })
-            } )
+            })
     }
 
     onChangeHandler = (e) => {
@@ -33,21 +38,6 @@ class Home extends Component {
         this.setState({filteredData : filteredData})
     }
 
-    filterChangeHandler = (e, targetProp) => {
-        let filteredData = []
-        this.state.index.forEach((post)=>{
-            Object.values(post.targeting).forEach((target)=>{
-                if(target instanceof Array)
-                    target.forEach((value)=>{
-                        if(value===e.target.innerText){
-                            filteredData.push(post)
-                        }
-                    })
-            }) 
-            
-        })
-        this.setState({filteredData : filteredData})
-    }
 
     filterHandeler = (e, targetProp) => {
         let filteredData = []
@@ -60,7 +50,6 @@ class Home extends Component {
                 })
             }
         })
-        console.log('filter', filteredData)
         this.setState({filteredData})
     }
 
@@ -88,20 +77,29 @@ class Home extends Component {
     }
 
     render(){
+        console.log('render')
         return(
-            <div className='home'>
-                <Search
+            <div>
+                <NavBar
                     onChangeHandler={this.onChangeHandler}
-                    searchInput={this.state.search} />
-
-                <NewFilter data={this.state.index} filterHandeler={this.filterHandeler}  clearFilterHandeler={this.clearFilterHandeler}/>
-                <Compare data={this.state.compareData} />
-                <Table 
-                    data={this.state.filteredData.length > 0 ? this.state.filteredData : this.state.index}
-                    compareDataHandeler={this.compareDataHandeler}
-                /> 
-
-        </div>
+                    searchInput={this.state.search}
+                    data={this.state.index}
+                    filterHandeler={this.filterHandeler}
+                    clearFilterHandeler={this.clearFilterHandeler}
+                >
+                        {this.state.loaded ?
+                    <div className='home'>
+                        <Compare 
+                            data={this.state.compareData}
+                            removeData={this.compareDataHandeler}
+                        />
+                        <Table 
+                            data={this.state.filteredData.length > 0 ? this.state.filteredData : this.state.index}
+                            compareDataHandeler={this.compareDataHandeler}
+                        />
+                        </div> : <Progress />}
+                </NavBar>
+            </div>
         )
     }
 }

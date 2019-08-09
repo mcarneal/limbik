@@ -1,13 +1,19 @@
 import React, { Component } from 'react'
-
+import Modal from '../modal/analyze.js'
 
 class Compare extends Component{
+
+    state = {
+        open : false
+    }
 
 
     displayData = () => {
         if(this.props.data){
             return this.props.data.map(post => <tr id={`${post.id}`}>
-                <td><button className='ui red button'>Remove</button></td>
+                <td><button
+                    onClick={this.removeDataEntry}
+                    className='ui red button'>Remove</button></td>
                 <td>{post.id}</td>
                 <td>{this.postStringShortener(post.text)}</td>
                 <td>{post.clicks}</td>
@@ -15,6 +21,31 @@ class Compare extends Component{
                 <td>{`${post.spend.amount ? post.spend.amount : 0} ${post.spend.currency ? post.spend.currency : ''}`}</td>
                 </tr>)
         }
+    }
+
+    removeDataEntry = (e) => {
+        let id = e.target.parentNode.parentNode.id
+        this.props.removeData(id)
+    }
+
+
+    createTable = () => {
+        return(
+                <div>
+                    <table style={{width : '80vw'}}>
+                        <tr>
+                            <th>Remove</th>
+                            <th>Post ID</th>
+                            <th>Text</th>
+                            <th>Clicks</th>
+                            <th>Impressions</th>
+                            <th>Currency</th>
+                        </tr>
+                        {this.displayData()}
+                    </table>
+            </div>
+        )
+
     }
 
     postStringShortener = (string) => {
@@ -28,26 +59,37 @@ class Compare extends Component{
             return 'no description'
     }
 
+    analyzePostHandeler = () => {
+        console.log('analyzing data', this.props.data)
+    }
+
+    handleClickOpen = ()=> {
+        this.setState({
+            open : true
+        })
+  }
+
+    handleClose =()=> {
+        this.setState({
+            open : false
+        })
+  }
+
+
     render(){
 
 
         return(
             <div>
-                <div className='compare box'>
-                    <table style={{width : '95vw'}}>
-                        <tr>
-                            <th>Remove</th>
-                            <th>Post ID</th>
-                            <th>Text</th>
-                            <th>Clicks</th>
-                            <th>Impressions</th>
-                            <th>Currency</th>
-                        </tr>
-                        {this.displayData()}
-                    </table>
-                </div>
-                <button id='analyze' className='ui button blue'>Analyze</button>
+            <div className='compare box'>
+                    {this.props.data.length > 0 ? this.createTable() : <h3>Compare data sets currently empty</h3>}
             </div>
+                {this.props.data.length > 0 ?  <button onClick={this.handleClickOpen} id='analyze' className='ui button blue'>Analyze</button> : null }
+        <Modal
+            handleClose={this.handleClose}
+            data={this.props.data}
+            open={this.state.open} />
+        </div>
         )
     }
 }
