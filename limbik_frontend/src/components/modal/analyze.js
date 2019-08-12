@@ -56,7 +56,6 @@ class FullScreenDialog extends Component{
 
     render(){
     
-        console.log('found my dups', this.props.duplicates)
 
   return (
     <div>

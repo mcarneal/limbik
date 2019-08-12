@@ -21,9 +21,9 @@ Node and Express were used to serve the JSON file to the frontend.
 Installation Instructions:
 
 This file is broken into Two directories: Limbik-frontend and Limbik Backend.
-From the Backend folder run a Node index.js to begin the Express Server. By default this will run on localhost 3000:
+From the Backend folder run npm install and then run a Node index.js to begin the Express Server. By default this will run on localhost 3000:
 
-From the Front end directory run NPM start to begin the React App. if the React app attempts to run on localhost 3000 a warning will appear asking to start on 3001. Press yes.
+From the Front end directory run NPM install and than NPM start to begin the React App. if the React app attempts to run on localhost 3000 a warning will appear asking to start on 3001. Press yes.
 
 You can now begin your inspection of the 2016 facebook fake news posts in a visually appealing method. 
 

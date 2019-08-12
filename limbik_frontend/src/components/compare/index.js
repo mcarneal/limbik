@@ -59,9 +59,6 @@ class Compare extends Component{
             return 'no description'
     }
 
-    analyzePostHandeler = () => {
-        console.log('analyzing data', this.props.data)
-    }
 
     handleClickOpen = ()=> {
         this.setState({

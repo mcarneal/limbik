@@ -77,7 +77,6 @@ class Home extends Component {
     }
 
     render(){
-        console.log('render')
         return(
             <div>
                 <NavBar

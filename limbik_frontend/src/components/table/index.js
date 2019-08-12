@@ -18,7 +18,6 @@ class PostTable extends Component {
 
     sortImpressionsHandler = (e) => {
     
-        console.log('yeah')
 
         let data = this.props.data
       

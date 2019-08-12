@@ -15,7 +15,7 @@ class Show extends Component{
 
     assignTargetingValues = () => {
         const keys = this.findTargetingKeys()
-        return keys.map(key => this.props.data[0].targeting[key] instanceof Array ? <div><h3>{key} : {this.props.data[0].targeting[key]}</h3></div> : console.log('no', key) )
+        return keys.map(key => this.props.data[0].targeting[key] instanceof Array ? <div><h3>{key} : {this.props.data[0].targeting[key]}</h3></div> : null )
     }
 
 
@@ -24,8 +24,7 @@ class Show extends Component{
        return this.props.data[0].text.split(' ').map(word => word[0]==='#' ? <div><p>{word}</p></div> : null )
     } 
 
-    render(){
-
+       render(){
         this.findTwitterHash()
         return(
             <div>
